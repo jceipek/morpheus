@@ -35,3 +35,22 @@ gem 'jquery-rails'
 
 # To use debugger
 # gem 'debugger'
+
+gem "thin", ">= 1.5.0", :group => :production
+gem "mongoid", ">= 3.1.2"
+gem "rspec-rails", ">= 2.12.2", :group => [:development, :test]
+gem "database_cleaner", ">= 1.0.0.RC1", :group => :test
+gem "mongoid-rspec", ">= 1.7.0", :group => :test
+gem "email_spec", ">= 1.4.0", :group => :test
+gem "cucumber-rails", ">= 1.3.1", :group => :test, :require => false
+gem "launchy", ">= 2.2.0", :group => :test
+gem "capybara", ">= 2.0.3", :group => :test
+gem "guard-bundler", ">= 1.0.0", :group => :development
+gem "guard-cucumber", ">= 1.4.0", :group => :development
+gem "guard-rails", ">= 0.4.0", :group => :development
+gem "guard-rspec", ">= 2.5.2", :group => :development
+gem "rb-inotify", ">= 0.9.0", :group => :development, :require => false
+gem "rb-fsevent", ">= 0.9.3", :group => :development, :require => false
+gem "rb-fchange", ">= 0.0.6", :group => :development, :require => false
+gem "factory_girl_rails", ">= 4.2.0", :group => [:development, :test]
+gem "devise", ">= 2.2.3"
