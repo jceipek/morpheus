@@ -1,7 +1,7 @@
 window.onload = function () {
-	//var d = fake_sleep_generator(60);
-	var d = JSON.parse(document.getElementById('current-graph-container').getAttribute('data-url'));
-	d = parse_data(d);
+	var d = fake_sleep_generator(90);
+	//var d = JSON.parse(document.getElementById('current-graph-container').getAttribute('data-url'));
+	//d = parse_data(d);
 	visualize_sleepdata(d);	
 }
  
@@ -82,23 +82,50 @@ function fake_sleep_generator(count) {
 }*/
  
 function visualize_sleepdata(data) {
-	var chartHeight = 110;
-	var chartWidth = 1500;
-	var hourOffset = 24; // in [0,23] inclusive
-	var barThickness = 10;
-	var barPadding = 1;
+
+	// Setup
+	var margin = {top: 0, right: 10, bottom: 10, left: 40};
+	var height = d3.select("#overview-graph-container")[0][0].offsetHeight;
+	var width = d3.select("#overview-graph-container")[0][0].offsetWidth;
+	var hourOffset = 15; // in [0,23] inclusive
+	var canExceedBoundaries = false;
+	var minBarThickness = 3.8;
+	var minBarPadding = 1;
+	var paddingFactor = 0.5;
+	
+	// Configure dimensions
+	var chartHeight = height - margin.top - margin.bottom;
+	var chartWidth = width - margin.left - margin.right;
+	var barThickness = (chartWidth/data.length)*paddingFactor;
+	if (barThickness < minBarThickness) {
+		barThickness = minBarThickness;
+		chartWidth = barThickness/paddingFactor * data.length;
+		width = chartWidth + margin.left + margin.right;
+	}
+
+	console.log("CHART height: "+chartHeight);
+	console.log("CHART width: "+chartWidth);
+
+	var main_chart_container = d3.select("#overview-graph-container").append("svg")
+		.attr("height", height)
+		.attr("width", width);
+
+	var main_chart = main_chart_container.append("g");
+
+	main_chart.attr("class", "chart")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+		.attr("width", chartWidth)
+		.attr("height", chartHeight);
  
-	var main_chart = d3.select("#overview-graph-container").append("svg");
-	main_chart.attr("class", "chart").attr("height", chartHeight);
+	var firstDayStart = d3.min(data,function(d) {return d['start']});
+	firstDayStart = round_to_day_with_offset(firstDayStart, hourOffset);
  
-	var veryBeginning = d3.min(data,function(d) {return d['start']});
-	veryBeginning = round_to_day_with_offset(veryBeginning, hourOffset);
+ 	// Also the start of the final day+1, which is how we use it here
+	var finalDayEnd = d3.max(data,function(d) {return d['end']});
+	finalDayEnd = d3.time.day.offset(finalDayEnd,1);
+	finalDayEnd = round_to_day_with_offset(finalDayEnd, hourOffset);
  
-	var veryEnd = d3.max(data,function(d) {return d['end']});
-	veryEnd = d3.time.day.offset(veryEnd,1);
-	veryEnd = round_to_day_with_offset(veryEnd, hourOffset);
- 
-	var x = d3.time.scale().domain([veryBeginning,veryEnd]).range([0,chartWidth]);
+	var x = d3.time.scale().domain([firstDayStart,finalDayEnd]).range([0,chartWidth]);
  
 	var brush = d3.svg.brush()
     	.x(x)
@@ -136,7 +163,6 @@ function visualize_sleepdata(data) {
 			// For debugging end day
 			//var wakeupDay = round_to_day_with_offset(sleepEnd, hourOffset);
 
- 			console.log("NEW!");
 			while (sleepStart < sleepEnd && 
 				   dayStart < sleepEnd) {
 
@@ -146,6 +172,7 @@ function visualize_sleepdata(data) {
 				//  with a 3 hour offset.
 				//dayStart = round_to_day_with_offset(sleepStart, hourOffset);
 				//dayEnd = d3.time.day.offset(dayStart, 1);
+
 				y = d3.time.scale().domain([dayStart,dayEnd]).range([0,chartHeight]);
 
 				h = (Math.min(y(sleepEnd),chartHeight)-y(sleepStart));
@@ -177,6 +204,6 @@ function visualize_sleepdata(data) {
       		.attr("class", "x brush")
       		.call(brush)
     		.selectAll("rect")
-      		.attr("y", -6)
-      		.attr("height", chartHeight + 7);
+      		.attr("y", 0)
+      		.attr("height", chartHeight);
 }
