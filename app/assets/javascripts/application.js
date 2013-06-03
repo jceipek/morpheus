@@ -12,4 +12,6 @@
 //
 //= require jquery
 //= require jquery_ujs
+//= require d3.v3.min
+//= require visualize
 //= require_tree .

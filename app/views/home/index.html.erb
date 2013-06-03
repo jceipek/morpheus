@@ -1,7 +1,7 @@
+
 <% if current_user %>
-  <div id='overview-graph-container'></div>
-  <div id='current-graph-container'></div>
-  <p>Logged in as <%= current_user.name %></p>
+  <%= content_tag :div, nil, id: "overview-graph-container" %>
+  <%= content_tag :div, nil, id: "current-graph-container", data: {url: current_user.sleep_data_block.sleeps} %>
 <% else %>
 
 <% end %>
