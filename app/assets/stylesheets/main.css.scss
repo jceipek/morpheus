@@ -24,6 +24,12 @@
   }
 }
 
+.brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
+
 #overview-graph-container {
   height: 7em;
   background-color: rgba(40, 19, 49, 0.92);

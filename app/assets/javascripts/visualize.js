@@ -104,7 +104,27 @@ function visualize_sleepdata(data) {
 	veryEnd = round_to_day_with_offset(veryEnd, hourOffset);
  
 	var x = d3.time.scale().domain([veryBeginning,veryEnd]).range([0,1]);
+
+	var x_brush = d3.time.scale().domain([veryBeginning,veryEnd]).range([0,chartWidth]);
  
+	var brush = d3.svg.brush()
+    	.x(x_brush)
+    	.on("brush", brushed);
+
+	function brushed() {
+	  //x.domain(brush.empty() ? x2.domain() : brush.extent());
+	  //focus.select("path").attr("d", area);
+	  //focus.select(".x.axis").call(xAxis);
+	  console.log("BRUSHED!");
+	}
+
+    main_chart.append("g")
+      .attr("class", "x brush")
+      .call(brush)
+    .selectAll("rect")
+      .attr("y", -6)
+      .attr("height", chartHeight + 7);
+
 	main_chart.selectAll("g.sleep")
 		.data(data)
 		.enter().append("g").attr("class","sleep")
