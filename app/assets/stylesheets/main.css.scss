@@ -24,6 +24,19 @@
   }
 }
 
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #fff;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    fill: #fff;
+    font-family: sans-serif;
+    font-size: 11px;
+}
+
 .brush .extent {
   stroke: #fff;
   fill-opacity: .125;
@@ -34,6 +47,8 @@
   height: 7em;
   background-color: rgba(40, 19, 49, 0.92);
   @include box-shadow(0, 0, 15px, rgba(0, 0, 0, 0.75), true);
+  overflow-x: scroll;
+  overflow-y: hidden;
 }
 
 #current-graph-container {

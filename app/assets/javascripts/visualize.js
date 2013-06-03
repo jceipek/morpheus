@@ -1,7 +1,7 @@
 window.onload = function () {
-	var d = fake_sleep_generator(90);
-	//var d = JSON.parse(document.getElementById('current-graph-container').getAttribute('data-url'));
-	//d = parse_data(d);
+	//var d = fake_sleep_generator(300);
+	var d = JSON.parse(document.getElementById('current-graph-container').getAttribute('data-url'));
+	d = parse_data(d);
 	visualize_sleepdata(d);	
 }
  
@@ -81,10 +81,21 @@ function fake_sleep_generator(count) {
 	return data;
 }*/
  
+function longTimeFormat() {
+  return function(date) {
+  	if (date.getMonth() === 0 && date.getDate() < 8) {
+  		console.log(date);
+  		return d3.time.format("%Y")(date);
+  	}
+  	return d3.time.format("%m/%d")(date);
+  	//return function (d) { return d.getDay(); };
+  };
+}
+
 function visualize_sleepdata(data) {
 
 	// Setup
-	var margin = {top: 0, right: 10, bottom: 10, left: 40};
+	var margin = {top: 0, right: 10, bottom: 20, left: 40};
 	var height = d3.select("#overview-graph-container")[0][0].offsetHeight;
 	var width = d3.select("#overview-graph-container")[0][0].offsetWidth;
 	var hourOffset = 15; // in [0,23] inclusive
@@ -102,9 +113,6 @@ function visualize_sleepdata(data) {
 		chartWidth = barThickness/paddingFactor * data.length;
 		width = chartWidth + margin.left + margin.right;
 	}
-
-	console.log("CHART height: "+chartHeight);
-	console.log("CHART width: "+chartWidth);
 
 	var main_chart_container = d3.select("#overview-graph-container").append("svg")
 		.attr("height", height)
@@ -126,7 +134,16 @@ function visualize_sleepdata(data) {
 	finalDayEnd = round_to_day_with_offset(finalDayEnd, hourOffset);
  
 	var x = d3.time.scale().domain([firstDayStart,finalDayEnd]).range([0,chartWidth]);
- 
+
+	var xAxis = d3.svg.axis()
+				  //.ticks(d3.time.months, 1)
+				  .ticks(d3.time.mondays)
+				  .tickSubdivide(6)
+				  .tickSize(4, 2, 0)
+				  .tickFormat(longTimeFormat())
+                  .scale(x)
+                  .orient("bottom");
+
 	var brush = d3.svg.brush()
     	.x(x)
     	.on("brush", brushed);
@@ -206,4 +223,9 @@ function visualize_sleepdata(data) {
     		.selectAll("rect")
       		.attr("y", 0)
       		.attr("height", chartHeight);
+
+      	main_chart.append("g")
+      		.attr("class", "axis")
+      		.attr("transform", "translate(0," + (chartHeight + margin.top) + ")")
+      		.call(xAxis);
 }
