@@ -10,6 +10,12 @@
   }
 }
 
+@mixin vertical-gradient($top-color, $bottom-color) {
+  background: -webkit-linear-gradient(top, $top-color 0%,$bottom-color 100%);
+  background: -moz-linear-gradient(top, $top-color 0%,$bottom-color 100%);
+  background: linear-gradient(top, $top-color 0%,$bottom-color 100%);
+}
+
 @mixin remove-linkiness-with-color($color) {
   a:hover, a:visited, a:link, a:active
   {
@@ -24,12 +30,21 @@
   @include box-shadow(0, 0, 15px, rgba(0, 0, 0, 0.75), true);
 }
 
+#current-graph-container {
+  @include vertical-gradient(rgb(99,76,106), rgb(167,156,170));
+}
+
+html, body, #container, #main, #current-graph-container {
+  height: 100%;
+}
+
 body {
   font-family: 'Ropa Sans', sans-serif;
   background-image: image-url("Clouds.svg");
   background-repeat: repeat-x;
   background-color: rgb(69,43,79);
 }
+
 header {
   padding: 0.5em;
   height: 4em;
