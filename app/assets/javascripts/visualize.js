@@ -1,11 +1,7 @@
 window.onload = function () {
 	//var d = fake_sleep_generator(60);
-	console.log("Get DATA");
 	var d = JSON.parse(document.getElementById('current-graph-container').getAttribute('data-url'));
-	console.log("Parse Data");
 	d = parse_data(d);
-	console.log("Vis Data");
-	//console.log(d);
 	visualize_sleepdata(d);	
 }
  
@@ -23,7 +19,7 @@ function round_to_day_with_offset(time, hourOffset) {
 }
  
 function round_time_with_offset(time, hourOffset, roundFunc) {
-	roundFunc = roundFunc || d3.time.day.round
+	roundFunc = roundFunc || d3.time.day.round;
 	var time = d3.time.hour.offset(time,-hourOffset);
 	time = roundFunc(time);
 	time = d3.time.hour.offset(time,hourOffset);
@@ -46,7 +42,6 @@ function parse_data(d) {
 			}
 		} else {
 			console.log("Data error");
-			//throw "DIE!";
 		}
 
 	}
@@ -89,7 +84,7 @@ function fake_sleep_generator(count) {
 function visualize_sleepdata(data) {
 	var chartHeight = 110;
 	var chartWidth = 1500;
-	var hourOffset = 8; // Must be positive in current implementation
+	var hourOffset = 24; // in [0,23] inclusive
 	var barThickness = 10;
 	var barPadding = 1;
  
@@ -103,12 +98,10 @@ function visualize_sleepdata(data) {
 	veryEnd = d3.time.day.offset(veryEnd,1);
 	veryEnd = round_to_day_with_offset(veryEnd, hourOffset);
  
-	var x = d3.time.scale().domain([veryBeginning,veryEnd]).range([0,1]);
-
-	var x_brush = d3.time.scale().domain([veryBeginning,veryEnd]).range([0,chartWidth]);
+	var x = d3.time.scale().domain([veryBeginning,veryEnd]).range([0,chartWidth]);
  
 	var brush = d3.svg.brush()
-    	.x(x_brush)
+    	.x(x)
     	.on("brush", brushed);
 
 	function brushed() {
@@ -117,13 +110,6 @@ function visualize_sleepdata(data) {
 	  //focus.select(".x.axis").call(xAxis);
 	  console.log("BRUSHED!");
 	}
-
-    main_chart.append("g")
-      .attr("class", "x brush")
-      .call(brush)
-    .selectAll("rect")
-      .attr("y", -6)
-      .attr("height", chartHeight + 7);
 
 	main_chart.selectAll("g.sleep")
 		.data(data)
@@ -139,27 +125,38 @@ function visualize_sleepdata(data) {
  
 			var dayStart = round_to_day_with_offset(sleepStart, hourOffset);
 			var dayEnd = d3.time.day.offset(dayStart, 1);
-			var y = d3.time.scale().domain([dayStart,dayEnd]).range([0,1]);
- 
-			var h = (y(sleepEnd)-y(sleepStart));
- 
-			var wakeupDay = round_to_day_with_offset(sleepEnd, hourOffset);
- 
-			//segs.push({'x': x(dayStart)*chartWidth, 'y': y(sleepStart)*chartHeight, 'height': h*chartHeight});
- 
-			while (sleepStart < sleepEnd) {
-				dayStart = round_to_day_with_offset(sleepStart, hourOffset);
-				dayEnd = d3.time.day.offset(dayStart, 1);
-				y = d3.time.scale().domain([dayStart,dayEnd]).range([0,1]);
- 
-				h = (Math.min(y(sleepEnd),1)-y(sleepStart));
-				segs.push({'x': x(dayStart)*chartWidth, 'y': y(sleepStart)*chartHeight, 'height': h*chartHeight});
- 
+
+			var y, h;
+
+			// Visual Debug by drawing the entire sleep segment going off the edge of the chart
+			//y = d3.time.scale().domain([dayStart,dayEnd]).range([0,chartHeight]);
+			//h = (y(sleepEnd)-y(sleepStart)); 
+			//segs.push({'x': x(dayStart), 'y': y(sleepStart), 'height': h});
+			//
+			// For debugging end day
+			//var wakeupDay = round_to_day_with_offset(sleepEnd, hourOffset);
+
+ 			console.log("NEW!");
+			while (sleepStart < sleepEnd && 
+				   dayStart < sleepEnd) {
+
+				// This method, while elegant, is unstable
+				//  for example, it fails to handle {'start': "Sun Nov 06 2011 20:00:00 GMT-0500 (EST)", 
+				//                                   'end':"Mon Nov 07 2011 03:15:00 GMT-0500 (EST)"}
+				//  with a 3 hour offset.
+				//dayStart = round_to_day_with_offset(sleepStart, hourOffset);
+				//dayEnd = d3.time.day.offset(dayStart, 1);
+				y = d3.time.scale().domain([dayStart,dayEnd]).range([0,chartHeight]);
+
+				h = (Math.min(y(sleepEnd),chartHeight)-y(sleepStart));
+				segs.push({'x': x(dayStart), 'y': y(sleepStart), 'height': h});
+
 				sleepStart = round_to_day_with_offset(sleepStart, hourOffset);
-				sleepStart = d3.time.day.offset(sleepStart, 1);			
+				sleepStart = d3.time.day.offset(sleepStart, 1);
+
+				dayStart = d3.time.day.offset(dayStart, 1);
+				dayEnd = d3.time.day.offset(dayEnd, 1);
 			}
-			
-			//segs.push({'x': x(wakeupDay)*chartWidth, 'y': (y(sleepEnd)%1)*chartHeight, 'height': 2});
  
 			return segs;
 		}).enter().append("rect").attr("class","segment")
@@ -175,4 +172,11 @@ function visualize_sleepdata(data) {
 	    .attr("width", function(d) {
 	    	return barThickness;
 	    });
+
+	    main_chart.append("g")
+      		.attr("class", "x brush")
+      		.call(brush)
+    		.selectAll("rect")
+      		.attr("y", -6)
+      		.attr("height", chartHeight + 7);
 }
