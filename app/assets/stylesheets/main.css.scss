@@ -1,0 +1,78 @@
+@mixin box-shadow($top, $left, $blur, $color, $inset: false) {
+  @if $inset {
+    -webkit-box-shadow:inset $top $left $blur $color;
+    -moz-box-shadow:inset $top $left $blur $color;
+    box-shadow:inset $top $left $blur $color;
+  } @else {
+    -webkit-box-shadow: $top $left $blur $color;
+    -moz-box-shadow: $top $left $blur $color;
+    box-shadow: $top $left $blur $color;
+  }
+}
+
+@mixin remove-linkiness-with-color($color) {
+  a:hover, a:visited, a:link, a:active
+  {
+      color: $color;
+      text-decoration: none;
+  }
+}
+
+#overview-graph-container {
+  height: 7em;
+  background-color: rgba(40, 19, 49, 0.92);
+  @include box-shadow(0, 0, 15px, rgba(0, 0, 0, 0.75), true);
+}
+
+body {
+  font-family: 'Ropa Sans', sans-serif;
+  background-image: image-url("Clouds.svg");
+  background-repeat: repeat-x;
+  background-color: rgb(69,43,79);
+}
+header {
+  padding: 0.5em;
+  height: 4em;
+}
+.brand {
+  display: inline;
+  margin: 0.5em;
+  font-size: 2em;
+  line-height: 2em;
+  @include remove-linkiness-with-color(#fff);
+}
+ul.nav {
+  display: block;
+  float: right;
+}
+ul.nav {
+  list-style: none;
+  padding: 0;
+}
+ul.nav li {
+  display: inline;
+  @include remove-linkiness-with-color(#fff);
+  font-size: 1.2em;
+  padding-left: 1em;
+}
+/*
+ul.nav {
+  list-style: none;
+  margin: 0 0 2em;
+  padding: 0;
+}
+ul.nav li {
+  display: inline;
+}
+#flash_notice, #flash_alert {
+  padding: 5px 8px;
+  margin: 10px 0;
+}
+#flash_notice {
+  background-color: #CFC;
+  border: solid 1px #6C6;
+}
+#flash_alert {
+  background-color: #FCC;
+  border: solid 1px #C66;
+}*/
