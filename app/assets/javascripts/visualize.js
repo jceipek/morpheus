@@ -1,14 +1,30 @@
 window.onload = function () {
-	//var d = fake_sleep_generator(300);
-	var d = JSON.parse(document.getElementById('current-graph-container').getAttribute('data-url'));
-	d = parse_data(d);
+	var d = fake_sleep_generator(300);
+	//var d = JSON.parse(document.getElementById('current-graph-container').getAttribute('data-url'));
+	//d = parse_data(d);
+	var overviewGraphContainer = d3.select("#overview-graph-container");
+	var currentGraphContainer = d3.select("#current-graph-container");
+
 	visualize_sleepdata(d, {
 		margin: {top: 0, right: 10, bottom: 20, left: 40},
-		height: d3.select("#overview-graph-container")[0][0].offsetHeight,
-		width: d3.select("#overview-graph-container")[0][0].offsetWidth,
+		height: overviewGraphContainer[0][0].offsetHeight,
+		width: overviewGraphContainer[0][0].offsetWidth,
 		hourOffset: 15,
 		minBarThickness: 3.8,
-		paddingFactor: 0.5
+		paddingFactor: 0.5,
+		d3Node: overviewGraphContainer
+	});
+
+	var height = currentGraphContainer[0][0].offsetHeight;
+	var width = currentGraphContainer[0][0].offsetWidth;
+	visualize_sleepdata(d.slice(d.length - 1 - 7, d.length - 1), {
+		margin: {top: height*0.1, right: width*0.1, bottom: height*0.4, left: width*0.1},
+		height: height,
+		width: width,
+		hourOffset: 15,
+		minBarThickness: 3.8,
+		paddingFactor: 0.5,
+		d3Node: currentGraphContainer
 	});
 }
  
@@ -165,13 +181,15 @@ function visualize_sleepdata(data, params) {
 	var hourOffset = params['hourOffset'];
 	var minBarThickness = params['minBarThickness'];
 	var paddingFactor = params['paddingFactor'];
+	var d3Node = params['d3Node'];
 
 	if (margin === undefined || 
 	height === undefined || 
 	width === undefined || 
 	hourOffset === undefined || 
 	minBarThickness === undefined || 
-	paddingFactor === undefined) throw "Undefined params!";
+	paddingFactor === undefined ||
+	d3Node === undefined) throw "Undefined params!";
 	
 	// Configure dimensions
 	var chartHeight = height - margin.top - margin.bottom;
@@ -183,7 +201,7 @@ function visualize_sleepdata(data, params) {
 		width = chartWidth + margin.left + margin.right;
 	}
 
-	var main_chart_container = d3.select("#overview-graph-container").append("svg")
+	var main_chart_container = d3Node.append("svg")
 		.attr("height", height)
 		.attr("width", width);
 
@@ -256,6 +274,6 @@ function visualize_sleepdata(data, params) {
 
       	main_chart.append("g")
       		.attr("class", "axis")
-      		.attr("transform", "translate(0," + (chartHeight + margin.top) + ")")
+      		.attr("transform", "translate(0," + chartHeight + ")")
       		.call(xAxis);
 }
