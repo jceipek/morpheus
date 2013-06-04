@@ -172,14 +172,6 @@ function visualize_sleepdata(data, params) {
 	hourOffset === undefined || 
 	minBarThickness === undefined || 
 	paddingFactor === undefined) throw "Undefined params!";
-
-	// Setup
-	var margin = {top: 0, right: 10, bottom: 20, left: 40};
-	var height = d3.select("#overview-graph-container")[0][0].offsetHeight;
-	var width = d3.select("#overview-graph-container")[0][0].offsetWidth;
-	var hourOffset = 15; // in [0,23] inclusive
-	var minBarThickness = 3.8;
-	var paddingFactor = 0.5;
 	
 	// Configure dimensions
 	var chartHeight = height - margin.top - margin.bottom;
