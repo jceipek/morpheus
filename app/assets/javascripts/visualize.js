@@ -2,7 +2,14 @@ window.onload = function () {
 	//var d = fake_sleep_generator(300);
 	var d = JSON.parse(document.getElementById('current-graph-container').getAttribute('data-url'));
 	d = parse_data(d);
-	visualize_sleepdata(d);	
+	visualize_sleepdata(d, {
+		margin: {top: 0, right: 10, bottom: 20, left: 40},
+		height: d3.select("#overview-graph-container")[0][0].offsetHeight,
+		width: d3.select("#overview-graph-container")[0][0].offsetWidth,
+		hourOffset: 15,
+		minBarThickness: 3.8,
+		paddingFactor: 0.5
+	});
 }
  
 function round_to_day_with_offset(time, hourOffset) {
@@ -92,15 +99,19 @@ function longTimeFormat() {
 
 function createSleepGraphBarsFunction(params) {
 	if (params === undefined) throw "No Params!";
+	
 	var hourOffset = params['hourOffset'];
 	var x = params['x'];
 	var chartHeight = params['chartHeight'];
 	var chartWidth = params['chartWidth'];
+
 	if (hourOffset === undefined || 
 		x === undefined || 
 		chartHeight === undefined ||
 		chartWidth === undefined) throw "Undefined Params!";
 
+	if (hourOffset < 0 || hourOffset > 23) throw "hourOffset must be in [0,23] inclusive!";
+// in [0,23] inclusive
 	return function (d) {
 		var segs = [];
 	 
@@ -146,7 +157,21 @@ function createSleepGraphBarsFunction(params) {
 	}
 }
 
-function visualize_sleepdata(data) {
+function visualize_sleepdata(data, params) {
+	
+	var margin = params['margin'];
+	var height = params['height'];
+	var width = params['width'];
+	var hourOffset = params['hourOffset'];
+	var minBarThickness = params['minBarThickness'];
+	var paddingFactor = params['paddingFactor'];
+
+	if (margin === undefined || 
+	height === undefined || 
+	width === undefined || 
+	hourOffset === undefined || 
+	minBarThickness === undefined || 
+	paddingFactor === undefined) throw "Undefined params!";
 
 	// Setup
 	var margin = {top: 0, right: 10, bottom: 20, left: 40};
@@ -188,7 +213,6 @@ function visualize_sleepdata(data) {
 	var x = d3.time.scale().domain([firstDayStart,finalDayEnd]).range([0,chartWidth]);
 
 	var xAxis = d3.svg.axis()
-				  //.ticks(d3.time.months, 1)
 				  .ticks(d3.time.mondays)
 				  .tickSubdivide(6)
 				  .tickSize(4, 2, 0)
